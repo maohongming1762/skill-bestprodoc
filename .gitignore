@@ -8,3 +8,10 @@ package_skill_simple.py
 
 # Ignore skill package (can be regenerated)
 *.skill
+
+# Ignore backup and project data
+backup/
+project-data/
+
+# Ignore skill package output directory
+skill-package-output/
