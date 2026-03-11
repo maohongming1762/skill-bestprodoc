@@ -60,7 +60,7 @@ def main():
     )
     parser.add_argument(
         '--skill-dir',
-        default='hyperbdr-best-practices-generator',
+        default='skill-bestprodoc',
         help='Skill directory to package'
     )
     parser.add_argument(

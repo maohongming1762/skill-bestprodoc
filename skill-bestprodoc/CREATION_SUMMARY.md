@@ -3,7 +3,7 @@
 ## ✅ Completed Tasks
 
 ### 1. Skill Directory Structure ✓
-- Created `hyperbdr-best-practices-generator/` directory
+- Created `skill-bestprodoc/` directory
 - Created subdirectories: `evals/`, `references/`, `assets/templates/`, `scripts/`
 
 ### 2. SKILL.md ✓

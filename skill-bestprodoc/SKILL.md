@@ -1,5 +1,5 @@
 ---
-name: hyperbdr-best-practices-generator
+name: skill-bestprodoc
 description: Generate HyperBDR disaster recovery best practices documentation in Chinese and English based on project data. Use this skill whenever the user mentions "auto最佳实践", "最佳实践文档", "best practices", or needs to create HyperBDR DR documentation from project data. This skill automatically generates bilingual (Chinese/English) Markdown documentation in three versions: concise, standard, and complete, following best practices standards from https://docs.oneprocloud.com/.
 ---
 
