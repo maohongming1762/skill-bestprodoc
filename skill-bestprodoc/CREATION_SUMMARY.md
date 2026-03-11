@@ -163,7 +163,7 @@ When user mentions "auto最佳实践" or similar phrases:
 ## 📦 Skill Package Structure
 
 ```
-hyperbdr-best-practices-generator/
+skill-bestprodoc/
 ├── SKILL.md                          # Main skill documentation
 ├── README.md                          # User guide
 ├── evals/
