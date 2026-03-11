@@ -1,0 +1,10 @@
+# Ignore test and temporary files
+best-practices-template/
+hyperbdr-best-practices-workspace/
+output/
+SKILL_PACKAGE_SUMMARY.md
+test_generator.py
+package_skill_simple.py
+
+# Ignore skill package (can be regenerated)
+*.skill
