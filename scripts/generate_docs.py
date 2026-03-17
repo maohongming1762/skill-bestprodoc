@@ -13,6 +13,18 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 import argparse
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from calculations import CalculationUtils, normalize_storage, normalize_time
+except ImportError:
+    # Fallback if calculations module not available
+    CalculationUtils = None
+    normalize_storage = lambda text, target_unit='TB': text
+    normalize_time = lambda text, target_unit='minutes': text
 
 
 class ProjectDataParser:
@@ -168,6 +180,8 @@ class TemplateProcessor:
     def __init__(self, template_dir: str):
         self.template_dir = template_dir
         self.templates = self._load_templates()
+        # Initialize calculation utilities
+        self.calc_utils = CalculationUtils() if CalculationUtils else None
     
     def _load_templates(self) -> Dict[str, str]:
         """Load all template files."""
@@ -204,7 +218,22 @@ class TemplateProcessor:
     
     def _replace_placeholders(self, template: str, data: Dict[str, Any]) -> str:
         """Replace placeholders in template with actual data."""
-        # Basic replacements
+        # Extract scale information for calculations
+        scale_text = data.get('scale', '')
+        
+        # Calculate storage capacity with proper normalization
+        storage_capacity = self._extract_storage(scale_text)
+        if self.calc_utils:
+            storage_capacity = self.calc_utils.extract_and_normalize_storage(scale_text, 'TB')
+        
+        # Calculate host count with proper formatting
+        host_count = scale_text
+        if self.calc_utils:
+            metrics = self.calc_utils.calculate_metrics(data)
+            if 'vm_count_formatted' in metrics:
+                host_count = metrics['vm_count_formatted']
+        
+# Basic replacements
         replacements = {
             '[项目名称]': data.get('project_name', ''),
             '[Project Name]': data.get('project_name', ''),
@@ -216,10 +245,10 @@ class TemplateProcessor:
             '[Business Characteristics]': data.get('business_characteristics', ''),
             '[关键系统列表]': data.get('key_systems', ''),
             '[Key Systems List]': data.get('key_systems', ''),
-            '[主机数量]': data.get('scale', ''),
-            '[Number of Hosts]': data.get('scale', ''),
-            '[存储容量]': self._extract_storage(data.get('scale', '')),
-            '[Storage Capacity]': self._extract_storage(data.get('scale', '')),
+            '[主机数量]': host_count,
+            '[Number of Hosts]': host_count,
+            '[存储容量]': storage_capacity,
+            '[Storage Capacity]': storage_capacity,
             '[源端平台]': data.get('source_environment', ''),
             '[Source Platform]': data.get('source_environment', ''),
             '[容灾目标和要求]': data.get('dr_objectives', ''),
@@ -300,28 +329,34 @@ class DocumentationGenerator:
         # Generate documents
         generated_files = {}
         
-        # Chinese documents
-        for version in ['concise', 'standard', 'complete']:
+        # Generate only standard version (as per optimization requirements)
+        versions = ['standard']
+        
+        for version in versions:
             zh_template = f'zh-{version}-template.md'
             zh_filename = f"{project_name}最佳实践-{self._version_to_zh(version)}-中文.md"
-            zh_content = self.template_processor.generate_document(zh_template, project_data)
             
-            zh_file_path = os.path.join(output_path, zh_filename)
-            with open(zh_file_path, 'w', encoding='utf-8') as f:
-                f.write(zh_content)
-            
-            generated_files[zh_filename] = zh_file_path
+            try:
+                zh_content = self.template_processor.generate_document(zh_template, project_data)
+                zh_file_path = os.path.join(output_path, zh_filename)
+                with open(zh_file_path, 'w', encoding='utf-8') as f:
+                    f.write(zh_content)
+                generated_files[zh_filename] = zh_file_path
+            except FileNotFoundError:
+                print(f"Warning: Template {zh_template} not found, skipping")
             
             # English documents
             en_template = f'en-{version}-template.md'
             en_filename = f"{project_name}Best Practices-{self._version_to_en(version)}-English.md"
-            en_content = self.template_processor.generate_document(en_template, project_data)
             
-            en_file_path = os.path.join(output_path, en_filename)
-            with open(en_file_path, 'w', encoding='utf-8') as f:
-                f.write(en_content)
-            
-            generated_files[en_filename] = en_file_path
+            try:
+                en_content = self.template_processor.generate_document(en_template, project_data)
+                en_file_path = os.path.join(output_path, en_filename)
+                with open(en_file_path, 'w', encoding='utf-8') as f:
+                    f.write(en_content)
+                generated_files[en_filename] = en_file_path
+            except FileNotFoundError:
+                print(f"Warning: Template {en_template} not found, skipping")
         
         return generated_files
     

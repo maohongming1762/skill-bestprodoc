@@ -157,11 +157,85 @@ Use local reference files and technical documentation:
 
 **IMPORTANT**: For any data calculations required in the documentation (e.g., RPO/RTO metrics, storage capacity calculations, data transfer rates), ensure accuracy by:
 
-- Using appropriate calculation tools or utilities for numerical computations
+- Using the dedicated `scripts/calculations.py` module for all calculations
 - Verifying all calculated values against project data
 - Ensuring units and formats are consistent
 - Documenting calculation methods where appropriate
-- Calculation tools can be customized based on specific requirements
+
+#### Calculation Module Features
+
+The `calculations.py` module provides the following utilities:
+
+**1. UnitConverter Class**
+- `convert_storage(value, from_unit, to_unit)`: Convert between B, KB, MB, GB, TB, PB
+- `convert_time(value, from_unit, to_unit)`: Convert between s, m, h, d
+- `convert_bandwidth(value, from_unit, to_unit)`: Convert between bps, Kbps, Mbps, Gbps
+- `parse_storage_string(text)`: Parse storage values from text (e.g., "1.5 TB")
+- `parse_time_string(text)`: Parse time values from text (e.g., "5 minutes")
+
+**2. DataValidator Class**
+- `validate_numeric_value(value, min_val, max_val)`: Validate numeric ranges
+- `validate_storage_capacity(text)`: Validate storage values
+- `validate_rpo_rto(text)`: Validate RPO/RTO time values
+- `validate_vm_count(text)`: Validate VM count values
+
+**3. MetricsCalculator Class**
+- `calculate_data_transfer_time(size_gb, bandwidth_mbps, compression_ratio)`: Calculate transfer time
+- `calculate_storage_efficiency(used_tb, total_tb)`: Calculate storage efficiency percentage
+- `calculate_rpo_achievable(sync_interval, network_latency)`: Determine if RPO is achievable
+- `calculate_cost_savings(traditional_cost, hyperbdr_cost)`: Calculate cost savings
+- `calculate_bandwidth_utilization(actual_mbps, available_mbps)`: Calculate bandwidth utilization
+
+**4. DataFormatter Class**
+- `format_storage(value, target_unit, precision)`: Format storage values
+- `format_time(value, target_unit, precision)`: Format time values
+- `format_bandwidth(value, target_unit, precision)`: Format bandwidth values
+- `format_percentage(value, precision)`: Format percentage values
+- `format_vm_count(count)`: Format VM count with plus sign for large numbers
+
+**5. CalculationUtils Class** (Main Interface)
+- `extract_and_normalize_storage(text, target_unit)`: Extract and normalize storage values
+- `extract_and_normalize_time(text, target_unit)`: Extract and normalize time values
+- `calculate_metrics(project_data)`: Calculate key metrics from project data
+
+#### Usage Examples
+
+```python
+from calculations import CalculationUtils
+
+utils = CalculationUtils()
+
+# Normalize storage to TB
+storage = utils.extract_and_normalize_storage("500 GB", "TB")
+# Result: "0.49 TB"
+
+# Normalize time to minutes
+time = utils.extract_and_normalize_time("2 hours", "minutes")
+# Result: "120.0 minutes"
+
+# Calculate metrics from project data
+metrics = utils.calculate_metrics(project_data)
+# Returns dict with storage_normalized, vm_count_formatted, etc.
+```
+
+#### Calculation Requirements
+
+When generating documentation, ensure:
+
+1. **Storage Capacity**: Always normalize to TB for consistency
+2. **VM Count**: Format with "+" for counts >= 1000 (e.g., "3500+ VMs")
+3. **Time Values**: Normalize to minutes for RPO/RTO
+4. **Percentage Values**: Round to 1 decimal place
+5. **Data Transfer**: Calculate actual transfer time based on size and bandwidth
+
+#### Error Handling
+
+The calculation module includes built-in error handling:
+
+- Invalid formats return original text with error logging
+- Out-of-range values are flagged and handled gracefully
+- Missing data fields return default values
+- All calculation errors are logged for debugging
 
 ### Step 9: English Translation
 
@@ -204,6 +278,14 @@ Use templates in `assets/templates/`:
 - `references/hyperbdr-knowledge.md`: Comprehensive HyperBDR knowledge base
 - `references/translation-guide.md`: Chinese-English terminology and translation guide
 
+### Calculation Module
+- `scripts/calculations.py`: Dedicated calculation utilities for accuracy
+  - UnitConverter: Handle unit conversions (storage, time, bandwidth)
+  - DataValidator: Validate extracted data values
+  - MetricsCalculator: Calculate key metrics (transfer time, efficiency, savings)
+  - DataFormatter: Format calculated values for display
+  - CalculationUtils: Main interface for all calculations
+
 ## Quality Checklist
 
 Before completing, ensure:
@@ -220,8 +302,13 @@ Before completing, ensure:
 - [ ] Tables are properly formatted
 - [ ] Markdown syntax is correct
 - [ ] Technical terminology is accurate
-- [ ] All numerical calculations are accurate and validated
-- [ ] No online/network resources were used
+- [ ] All numerical calculations use `scripts/calculations.py` module
+- [ ] Storage capacity values are normalized to TB
+- [ ] VM counts are formatted correctly (with "+" for >=1000)
+- [ ] Time values are normalized to minutes
+- [ ] Percentage values are rounded to 1 decimal place
+- [ ] All calculated values are validated against project data
+- [ ] No online/network resources were used for non-technical content
 
 ## Error Handling
 
@@ -253,9 +340,12 @@ Before completing, ensure:
    - Ensure proper grammar and phrasing
 
 6. **Calculation Errors**
-   - Verify all numerical calculations
-   - Use appropriate calculation tools for complex computations
-   - Document calculation methods for transparency
+    - Verify all numerical calculations using `scripts/calculations.py` module
+    - Check calculation module logs for specific error messages
+    - Validate unit conversions are correct
+    - Ensure calculated values are within reasonable ranges
+    - Use CalculationUtils class for all calculations
+    - Document calculation methods for transparency
 
 7. **Data Source Issues**
    - Technical content: Use https://docs.oneprocloud.com/ for HyperBDR technical knowledge
